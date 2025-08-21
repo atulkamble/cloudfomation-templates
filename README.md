@@ -880,4 +880,86 @@ cloudformation-kit/
 └─ 99-nested-master.yml
 ```
 
-I’ve “updated the same” by turning your high-level list into complete, deployable templates + commands. If you want any **service added (ECS, ElastiCache, OpenSearch, SQS/SNS fanout, EventBridge)**, say the word and I’ll drop in those templates too.
+Got it 👍 Atul — here’s the **AWS CLI command pattern** you’ll use to run (create/update) a **CloudFormation template**.
+
+---
+
+# 📌 1. Validate the Template (Optional but Recommended)
+
+Before deploying, make sure the YAML/JSON file is valid:
+
+```bash
+aws cloudformation validate-template \
+  --template-body file://template.yml
+```
+
+---
+
+# 📌 2. Create a New Stack
+
+If you’re deploying for the **first time**:
+
+```bash
+aws cloudformation create-stack \
+  --stack-name my-stack \
+  --template-body file://template.yml \
+  --parameters ParameterKey=Env,ParameterValue=dev ParameterKey=Project,ParameterValue=demo \
+  --capabilities CAPABILITY_NAMED_IAM
+```
+
+---
+
+# 📌 3. Update an Existing Stack
+
+If the stack already exists and you want to apply changes:
+
+```bash
+aws cloudformation update-stack \
+  --stack-name my-stack \
+  --template-body file://template.yml \
+  --parameters ParameterKey=Env,ParameterValue=dev ParameterKey=Project,ParameterValue=demo \
+  --capabilities CAPABILITY_NAMED_IAM
+```
+
+---
+
+# 📌 4. Easier Way — `deploy` Command (Auto Create/Update)
+
+This is the **most commonly used** because it handles both **create + update**:
+
+```bash
+aws cloudformation deploy \
+  --stack-name my-stack \
+  --template-file template.yml \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --parameter-overrides Env=dev Project=demo
+```
+
+---
+
+# 📌 5. Delete a Stack
+
+To tear it down:
+
+```bash
+aws cloudformation delete-stack \
+  --stack-name my-stack
+```
+
+---
+
+✅ **Notes:**
+
+* Use `file://template.yml` when the template is local.
+* If stored in **S3**, use `--template-url https://s3.amazonaws.com/bucket/template.yml`.
+* Always include `--capabilities CAPABILITY_NAMED_IAM` if your template creates IAM roles/policies.
+* Add multiple parameters as:
+
+  ```
+  --parameters ParameterKey=KeyName,ParameterValue=my-key ParameterKey=VpcId,ParameterValue=vpc-12345
+  ```
+
+---
+
+👉 Do you want me to also give you a **ready-made one-liner command** for each of the templates I gave you earlier (VPC, S3, EC2, ALB, RDS, Lambda, etc.) so you can deploy them directly without editing?
+
